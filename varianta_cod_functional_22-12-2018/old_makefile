@@ -1,0 +1,179 @@
+SHELL:=/bin/bash
+
+all : build_all run_each_size
+
+collect_data:
+	touch data.csv
+	printf "%s\n" "Rezolutie,Framework,Time" > data.csv
+
+build_serial : collect_data
+	gcc -std=c99 MedianFilter.c -o serial.o
+
+build_openmp : collect_data
+	gcc -std=c99 -fopenmp MedianFilterOpenMP.c -o openmp.o
+
+build_pthread : collect_data
+	gcc -std=c99 -lpthread  MedianPthread.c -o pthread.o
+
+build_mpi: collect_data
+	. /usr/share/Modules/init/bash; \
+	module load libraries/openmpi-2.0.1-gcc-5.4.0; \
+	mpicc -std=c99 MedianFilterMPI.c -o mpi.o
+
+
+build_all : build_serial build_openmp build_pthread build_mpi
+
+run_each_size: run_256_all run_nano_all run_small_all run_2048_all run_all run_big_all run_huge_all
+
+run_fast_serial :
+	./serial.o input/lena512.bmp
+run_fast_openmp :
+	OMP_NUM_THREADS=4 ./openmp.o input/lena512.bmp
+run_fast_pthread :
+	./pthread.o input/lena512.bmp
+run_fast_mpi:
+	. /usr/share/Modules/init/bash; \
+	module load libraries/openmpi-2.0.1-gcc-5.4.0; \
+	mpirun -np 4 ./mpi.o input/lena512.bmp
+
+run_fast_all: run_nano_serial run_nano_openmp run_nano_pthread run_nano_mpi
+
+
+
+run_huge_serial :
+	./serial.o input/lena_16380.bmp
+
+run_huge_openmp :
+	OMP_NUM_THREADS=16 ./openmp.o input/lena_16380.bmp
+
+run_huge_pthread :
+	./pthread.o input/lena_16380.bmp
+
+run_huge_mpi :
+	. /usr/share/Modules/init/bash; \
+	module load libraries/openmpi-2.0.1-gcc-5.4.0; \
+	mpirun -np 4 ./mpi.o input/lena_16380.bmp
+
+run_huge_all: run_huge_serial run_huge_openmp run_huge_pthread run_huge_mpi
+
+
+
+run_big_serial :
+	./serial.o input/lena_8192.bmp
+
+run_big_openmp :
+	OMP_NUM_THREADS=4;\
+	./openmp.o input/lena_8192.bmp
+
+run_big_pthread :
+	./pthread.o input/lena_8192.bmp
+
+run_big_mpi:
+	. /usr/share/Modules/init/bash; \
+	module load libraries/openmpi-2.0.1-gcc-5.4.0; \
+	mpirun -np 4 ./mpi.o input/lena_8192.bmp
+
+run_big_all: run_big_serial run_big_openmp run_big_pthread run_big_mpi
+
+
+
+run_serial :
+	./serial.o input/lena_4096.bmp
+
+run_openmp :
+	OMP_NUM_THREADS=4; \
+	./openmp.o input/lena_4096.bmp
+
+run_pthread :
+	./pthread.o input/lena_4096.bmp
+
+run_mpi:
+	. /usr/share/Modules/init/bash; \
+	module load libraries/openmpi-2.0.1-gcc-5.4.0; \
+	mpirun -np 4 ./mpi.o input/lena_4096.bmp
+
+run_all: run_serial run_openmp run_pthread run_mpi
+
+
+
+
+run_small_serial :
+	./serial.o input/lena_gray_1024.bmp
+
+run_small_openmp :
+	OMP_NUM_THREADS=4; \
+	./openmp.o input/lena_gray_1024.bmp
+
+run_small_pthread :
+	./pthread.o input/lena_gray_1024.bmp
+
+run_small_mpi:
+	. /usr/share/Modules/init/bash; \
+	module load libraries/openmpi-2.0.1-gcc-5.4.0; \
+	mpirun -np 4 ./mpi.o input/lena_gray_1024.bmp
+
+run_small_all: run_small_serial run_small_openmp run_small_pthread run_small_mpi
+
+
+
+run_nano_serial :
+	./serial.o input/lena512.bmp
+
+run_nano_openmp :
+	OMP_NUM_THREADS=8; \
+	./openmp.o input/lena512.bmp
+
+run_nano_pthread :
+	./pthread.o input/lena512.bmp
+
+run_nano_mpi:
+	. /usr/share/Modules/init/bash; \
+	module load libraries/openmpi-2.0.1-gcc-5.4.0; \
+	mpirun -np 4 ./mpi.o input/lena512.bmp
+
+run_nano_all: run_nano_serial run_nano_openmp run_nano_pthread run_nano_mpi
+
+
+run_256_serial :
+	./serial.o input/lena_256.bmp
+
+run_256_openmp :
+	OMP_NUM_THREADS=4; \
+	./openmp.o input/lena_256.bmp
+
+run_256_pthread :
+	./pthread.o input/lena_256.bmp
+
+run_256_mpi:
+	. /usr/share/Modules/init/bash; \
+	module load libraries/openmpi-2.0.1-gcc-5.4.0; \
+	mpirun -np 4 ./mpi.o input/lena_256.bmp
+
+run_256_all: run_256_serial run_256_openmp run_256_pthread run_256_mpi
+
+
+run_2048_serial :
+	./serial.o input/lena_2048.bmp
+
+run_2048_openmp :
+	OMP_NUM_THREADS=4; \
+	./openmp.o input/lena_2048.bmp
+
+run_2048_pthread :
+	./pthread.o input/lena_2048.bmp
+
+run_2048_mpi:
+	. /usr/share/Modules/init/bash; \
+	module load libraries/openmpi-2.0.1-gcc-5.4.0; \
+	mpirun -np 4 ./mpi.o input/lena_2048.bmp
+
+run_2048_all: run_2048_serial run_2048_openmp run_2048_pthread run_2048_mpi
+
+
+clean_data:
+	rm data.csv
+
+clean :
+	rm  data.csv *.o output/serial.bmp output/openmp.bmp output/mpi.bmp output/pthread.bmp
+
+clean_all: clean clean_data
